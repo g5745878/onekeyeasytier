@@ -177,6 +177,10 @@ remove_shortcut() {
     fi
 }
 
+install_shortcut_menu() {
+    create_shortcut || return 1
+}
+
 install_easytier() {
     echo -e "${GREEN}--- 开始安装或更新 EasyTier (OpenWrt/aarch64) ---${NC}"
 
@@ -366,19 +370,20 @@ main() {
         clear
         echo "======================================================="; echo -e "   ${GREEN}EasyTier OpenWrt 专属管理脚本 v6.2${NC}"; echo -e "   (架构: aarch64, 自动创建 'et' 快捷命令)"; echo "======================================================="
         echo " 1. 安装或更新 EasyTier"; echo " 2. 部署新网络 (首个节点)"; echo " 3. 加入现有网络"; echo "-------------------------------------------------------"
-        echo " 4. 管理服务 (启停/状态/日志)"; echo " 5. 查看配置文件"; echo " 6. 查看网络节点 (easytier-cli)"; echo "-------------------------------------------------------"
-        echo " 7. 卸载 EasyTier"; echo " 0. 退出脚本"; echo "======================================================="
-        read -p "请输入选项 [0-7]: " choice
+        echo " 4. 安装 et 快捷命令"; echo " 5. 管理服务 (启停/状态/日志)"; echo " 6. 查看配置文件"; echo " 7. 查看网络节点 (easytier-cli)"; echo "-------------------------------------------------------"
+        echo " 8. 卸载 EasyTier"; echo " 0. 退出脚本"; echo "======================================================="
+        read -p "请输入选项 [0-8]: " choice
         
         echo
         case $choice in
             1) install_easytier ;;
             2) deploy_new_network ;;
             3) join_existing_network ;;
-            4) manage_service_menu ;;
-            5) if check_installed && [ -f "$CONFIG_FILE" ]; then cat "$CONFIG_FILE"; else echo -e "${YELLOW}配置文件不存在或 EasyTier 未安装。${NC}"; fi ;;
-            6) if check_installed; then ${INSTALL_DIR}/${CLI_BINARY_NAME} peer; fi ;;
-            7) uninstall_easytier ;;
+            4) install_shortcut_menu ;;
+            5) manage_service_menu ;;
+            6) if check_installed && [ -f "$CONFIG_FILE" ]; then cat "$CONFIG_FILE"; else echo -e "${YELLOW}配置文件不存在或 EasyTier 未安装。${NC}"; fi ;;
+            7) if check_installed; then ${INSTALL_DIR}/${CLI_BINARY_NAME} peer; fi ;;
+            8) uninstall_easytier ;;
             0) exit 0 ;;
             *) echo -e "${RED}无效输入${NC}" ;;
         esac
