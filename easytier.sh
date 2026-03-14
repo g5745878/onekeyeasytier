@@ -17,6 +17,7 @@ CONFIG_FILE="${CONFIG_DIR}/easytier.toml"
 CORE_BINARY_NAME="easytier-core"
 CLI_BINARY_NAME="easytier-cli"
 ALIAS_PATH="/usr/local/bin/et"
+MANAGER_SCRIPT_PATH="/usr/local/bin/easytier-manager"
 
 # --- 平台特定变量 (将在 main 函数中设置) ---
 OS_TYPE=""
@@ -165,12 +166,31 @@ log_service() { if [[ "$OS_TYPE" == "linux" ]]; then journalctl -u "${SERVICE_NA
 
 # --- 主功能函数 ---
 create_shortcut() {
-	local SCRIPT_PATH; SCRIPT_PATH=$(realpath "$0" 2>/dev/null || (cd "$(dirname "$0")" && echo "$(pwd)/$(basename "$0")"))
-	if [ -L "${ALIAS_PATH}" ] && [ "$(readlink "${ALIAS_PATH}")" = "${SCRIPT_PATH}" ]; then return 0; fi
 	echo -e "${YELLOW}正在创建“et”快捷命令...${NC}"
-	chmod +x "${SCRIPT_PATH}"
-	ln -sf "${SCRIPT_PATH}" "${ALIAS_PATH}"
-	if [ $? -eq 0 ]; then echo -e "${GREEN}成功! 现在你可以在终端中直接输入“et”来运行此脚本。${NC}"; else echo -e "${RED}创建快捷命令失败。请检查权限或 /usr/local/bin 是否在你的 PATH 中。${NC}"; fi
+	local script_path target_path
+	script_path=$(realpath "$0" 2>/dev/null || (cd "$(dirname "$0")" && echo "$(pwd)/$(basename "$0")"))
+
+	case "${script_path}" in
+		/dev/fd/*|/proc/*/fd/*|pipe:*)
+			echo -e "${YELLOW}检测到当前脚本是通过临时管道执行的，无法为“et”创建可复用入口。${NC}"
+			echo -e "${YELLOW}请先将脚本保存为本地文件后重新运行，例如: sudo bash easytier.sh${NC}"
+			return 1
+			;;
+	esac
+
+	if [ ! -f "${script_path}" ]; then
+		echo -e "${RED}创建快捷命令失败: 未找到当前脚本文件 ${script_path}${NC}"
+		return 1
+	fi
+
+	target_path="${MANAGER_SCRIPT_PATH}"
+	if [ "${script_path}" != "${target_path}" ]; then
+		cp "${script_path}" "${target_path}" || { echo -e "${RED}无法写入管理脚本: ${target_path}${NC}"; return 1; }
+	fi
+
+	chmod +x "${target_path}" || { echo -e "${RED}无法设置管理脚本执行权限: ${target_path}${NC}"; return 1; }
+	ln -sf "${target_path}" "${ALIAS_PATH}" || { echo -e "${RED}创建快捷命令失败。请检查权限或 /usr/local/bin 是否在你的 PATH 中。${NC}"; return 1; }
+	echo -e "${GREEN}成功! 现在你可以在终端中直接输入“et”来运行此脚本。${NC}"
 }
 
 remove_shortcut() {
@@ -314,7 +334,7 @@ join_existing_network() {
 
 manage_service() { check_installed || return 1; PS3="请选择操作: "; options=("启动" "停止" "重启" "状态" "设为开机自启" "取消开机自启" "查看日志" "返回"); select opt in "${options[@]}"; do case $opt in "启动") start_service && echo -e "${GREEN}服务已启动。${NC}"; break ;; "停止") stop_service && echo -e "${GREEN}服务已停止。${NC}"; break ;; "重启") restart_service && echo -e "${GREEN}服务已重启。${NC}"; break ;; "状态") status_service; break ;; "设为开机自启") enable_service; break ;; "取消开机自启") disable_service; break ;; "查看日志") log_service; break ;; "返回") break ;; esac; done; }
 
-uninstall_easytier() { read -p "警告: 此操作将停止服务并删除所有相关文件。确定要卸载吗? (y/n): " confirm; if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then echo "操作已取消。"; return; fi; echo "正在停止并禁用服务..."; stop_service &> /dev/null; disable_service &> /dev/null; echo "正在删除文件..."; rm -f "${SERVICE_FILE}" "${INSTALL_DIR}/${CORE_BINARY_NAME}" "${INSTALL_DIR}/${CLI_BINARY_NAME}"; rm -rf "${CONFIG_DIR}"; remove_shortcut; if [[ "$OS_TYPE" == "linux" ]]; then systemctl daemon-reload; fi; if [[ "$OS_TYPE" == "macos" || "$OS_TYPE" == "alpine" ]]; then rm -f "$LOG_FILE"; fi; echo -e "${GREEN}EasyTier 已成功卸载。${NC}"; }
+uninstall_easytier() { read -p "警告: 此操作将停止服务并删除所有相关文件。确定要卸载吗? (y/n): " confirm; if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then echo "操作已取消。"; return; fi; echo "正在停止并禁用服务..."; stop_service &> /dev/null; disable_service &> /dev/null; echo "正在删除文件..."; rm -f "${SERVICE_FILE}" "${INSTALL_DIR}/${CORE_BINARY_NAME}" "${INSTALL_DIR}/${CLI_BINARY_NAME}" "${MANAGER_SCRIPT_PATH}"; rm -rf "${CONFIG_DIR}"; remove_shortcut; if [[ "$OS_TYPE" == "linux" ]]; then systemctl daemon-reload; fi; if [[ "$OS_TYPE" == "macos" || "$OS_TYPE" == "alpine" ]]; then rm -f "$LOG_FILE"; fi; echo -e "${GREEN}EasyTier 已成功卸载。${NC}"; }
 
 # --- 主菜单 ---
 main() {

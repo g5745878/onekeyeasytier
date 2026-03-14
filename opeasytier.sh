@@ -22,6 +22,7 @@ CONFIG_FILE="${CONFIG_DIR}/easytier.toml"
 CORE_BINARY_NAME="easytier-core"
 CLI_BINARY_NAME="easytier-cli"
 ALIAS_PATH="/usr/bin/et"
+MANAGER_SCRIPT_PATH="/usr/bin/easytier-manager"
 SERVICE_NAME="easytier"
 SERVICE_FILE="/etc/init.d/${SERVICE_NAME}"
 
@@ -143,19 +144,31 @@ log_service() {
 
 # --- 主功能函数 ---
 create_shortcut() {
-    local SCRIPT_PATH
-    SCRIPT_PATH=$(realpath "$0" 2>/dev/null || (cd "$(dirname "$0")" && echo "$(pwd)/$(basename "$0")"))
-    if [ -L "${ALIAS_PATH}" ] && [ "$(readlink "${ALIAS_PATH}")" = "${SCRIPT_PATH}" ]; then
-        return 0
-    fi
     echo -e "${YELLOW}正在创建 'et' 快捷命令...${NC}"
-    chmod +x "${SCRIPT_PATH}"
-    ln -sf "${SCRIPT_PATH}" "${ALIAS_PATH}"
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}成功! 现在你可以在终端中直接输入 'et' 来运行此脚本。${NC}"
-    else
-        echo -e "${RED}创建快捷命令失败。请检查权限。${NC}"
+    local script_path target_path
+    script_path=$(realpath "$0" 2>/dev/null || (cd "$(dirname "$0")" && echo "$(pwd)/$(basename "$0")"))
+
+    case "${script_path}" in
+        /dev/fd/*|/proc/*/fd/*|pipe:*)
+            echo -e "${YELLOW}检测到当前脚本是通过临时管道执行的，无法为 'et' 创建可复用入口。${NC}"
+            echo -e "${YELLOW}请先将脚本保存为本地文件后重新运行，例如: sh opeasytier.sh${NC}"
+            return 1
+            ;;
+    esac
+
+    if [ ! -f "${script_path}" ]; then
+        echo -e "${RED}创建快捷命令失败: 未找到当前脚本文件 ${script_path}${NC}"
+        return 1
     fi
+
+    target_path="${MANAGER_SCRIPT_PATH}"
+    if [ "${script_path}" != "${target_path}" ]; then
+        cp "${script_path}" "${target_path}" || { echo -e "${RED}无法写入管理脚本: ${target_path}${NC}"; return 1; }
+    fi
+
+    chmod +x "${target_path}" || { echo -e "${RED}无法设置管理脚本执行权限: ${target_path}${NC}"; return 1; }
+    ln -sf "${target_path}" "${ALIAS_PATH}" || { echo -e "${RED}创建快捷命令失败。请检查权限。${NC}"; return 1; }
+    echo -e "${GREEN}成功! 现在你可以在终端中直接输入 'et' 来运行此脚本。${NC}"
 }
 
 remove_shortcut() {
@@ -339,7 +352,7 @@ uninstall_easytier() {
     if [ -f "$SERVICE_FILE" ]; then stop_service >/dev/null 2>&1; disable_service >/dev/null 2>&1; fi
     
     echo "正在删除文件..."
-    rm -f "${SERVICE_FILE}" "${INSTALL_DIR}/${CORE_BINARY_NAME}" "${INSTALL_DIR}/${CLI_BINARY_NAME}"
+    rm -f "${SERVICE_FILE}" "${INSTALL_DIR}/${CORE_BINARY_NAME}" "${INSTALL_DIR}/${CLI_BINARY_NAME}" "${MANAGER_SCRIPT_PATH}"
     rm -rf "${CONFIG_DIR}"; remove_shortcut
     
     echo -e "${GREEN}EasyTier 已成功卸载。${NC}"

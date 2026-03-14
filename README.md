@@ -1,10 +1,21 @@
 # onekeyeasytier
 
-一键组网，天下无敌。上面有windows版本，复制了在powershell运行就可以
+一键组网，天下无敌。仓库地址: [g5745878/onekeyeasytier](https://github.com/g5745878/onekeyeasytier)
 
 ![ec9mmBQAWMdMVdkePVvogUYIT4YlodQo.png](https://cdn.nodeimage.com/i/ec9mmBQAWMdMVdkePVvogUYIT4YlodQo.png)
+
+推荐安装方式: 先下载到本地文件再执行。这样脚本才能正确创建 `et` 快捷命令。
+
+```bash
+curl -fsSL -o /tmp/easytier.sh https://raw.githubusercontent.com/g5745878/onekeyeasytier/refs/heads/main/easytier.sh
+sudo bash /tmp/easytier.sh
 ```
-bash <(curl -sL https://raw.githubusercontent.com/ceocok/c.cococ/refs/heads/main/easytier.sh)
+
+OpenWrt 版本:
+
+```sh
+curl -fsSL -o /tmp/opeasytier.sh https://raw.githubusercontent.com/g5745878/onekeyeasytier/refs/heads/main/opeasytier.sh
+sh /tmp/opeasytier.sh
 ```
 - ✨ 这个脚本凭什么被称为“宇宙无敌好用”？
 - 🖥️ 全平台制霸
