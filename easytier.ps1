@@ -68,6 +68,51 @@ function Set-TomlValue {
     }
 }
 
+function Add-InstallDirToSystemPath {
+    $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    $machineEntries = @()
+    if (-not [string]::IsNullOrWhiteSpace($machinePath)) {
+        $machineEntries = $machinePath -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+    }
+
+    if ($machineEntries -contains $InstallDir) {
+        if (-not (($env:Path -split ';') -contains $InstallDir)) {
+            $env:Path = "$env:Path;$InstallDir"
+        }
+        Write-Host "CLI path already exists in PATH: $InstallDir" -ForegroundColor $c_cyan
+        return
+    }
+
+    $newPath = if ([string]::IsNullOrWhiteSpace($machinePath)) { $InstallDir } else { "$machinePath;$InstallDir" }
+    [Environment]::SetEnvironmentVariable("Path", $newPath, "Machine")
+
+    if (-not (($env:Path -split ';') -contains $InstallDir)) {
+        $env:Path = "$env:Path;$InstallDir"
+    }
+
+    Write-Host "Added CLI path to system PATH: $InstallDir" -ForegroundColor $c_green
+}
+
+function Remove-InstallDirFromSystemPath {
+    $machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    if ([string]::IsNullOrWhiteSpace($machinePath)) {
+        return
+    }
+
+    $newEntries = $machinePath -split ';' | Where-Object {
+        -not [string]::IsNullOrWhiteSpace($_) -and $_ -ne $InstallDir
+    }
+
+    [Environment]::SetEnvironmentVariable("Path", ($newEntries -join ';'), "Machine")
+
+    $sessionEntries = $env:Path -split ';' | Where-Object {
+        -not [string]::IsNullOrWhiteSpace($_) -and $_ -ne $InstallDir
+    }
+    $env:Path = $sessionEntries -join ';'
+
+    Write-Host "Removed CLI path from system PATH: $InstallDir" -ForegroundColor $c_green
+}
+
 
 # --- 主功能函数 ---
 
@@ -149,6 +194,7 @@ function Install-EasyTier {
 
     Write-Host "--- EasyTier $version 安装/更新成功! ---" -ForegroundColor $c_green
     Write-Host "程序已安装到: $InstallDir" -ForegroundColor $c_cyan
+    Add-InstallDirToSystemPath
 
     # 如果服务已存在, 重启以应用更新
     if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue) {
@@ -294,6 +340,7 @@ function Uninstall-EasyTier {
     Write-Host "正在删除文件和目录..."
     if (Test-Path $InstallDir) { Remove-Item -Path $InstallDir -Recurse -Force }
     if (Test-Path $ConfigDir) { Remove-Item -Path $ConfigDir -Recurse -Force }
+    Remove-InstallDirFromSystemPath
     
     Write-Host "EasyTier 已成功卸载。" -ForegroundColor $c_green
 }
