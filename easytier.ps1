@@ -1,55 +1,55 @@
 #================================================================================
 
 
-# --- è„šæœ¬é…ç½® ---
+# --- ½Å±¾ÅäÖÃ ---
 $GithubApiUrl = "https://api.github.com/repos/EasyTier/EasyTier/releases/latest"
-$GithubProxy = "ghfast.top" # å¯é€‰ä»£ç†, ç•™ç©ºåˆ™ä¸ä½¿ç”¨
+$GithubProxy = "ghfast.top" # ¿ÉÑ¡´úÀí, Áô¿ÕÔò²»Ê¹ÓÃ
 
-# --- è·¯å¾„å’Œåç§°å®šä¹‰ ---
-# ä½¿ç”¨ Program Files å’Œ ProgramData æ˜¯ Windows çš„æ ‡å‡†åšæ³•
+# --- Â·¾¶ºÍÃû³Æ¶¨Òå ---
+# Ê¹ÓÃ Program Files ºÍ ProgramData ÊÇ Windows µÄ±ê×¼×ö·¨
 $InstallDir = "$env:ProgramFiles\EasyTier"
-$ConfigDir = "$env:ProgramData\EasyTier" # ProgramData æ˜¯ç³»ç»Ÿçº§åº”ç”¨æ•°æ®çš„å­˜æ”¾ä½ç½®
+$ConfigDir = "$env:ProgramData\EasyTier" # ProgramData ÊÇÏµÍ³¼¶Ó¦ÓÃÊı¾İµÄ´æ·ÅÎ»ÖÃ
 $ConfigFile = Join-Path $ConfigDir "easytier.toml"
 $CoreBinaryName = "easytier-core.exe"
 $CliBinaryName = "easytier-cli.exe"
 $CoreBinaryPath = Join-Path $InstallDir $CoreBinaryName
 $CliBinaryPath = Join-Path $InstallDir $CliBinaryName
 
-# --- Windows æœåŠ¡å®šä¹‰ ---
+# --- Windows ·şÎñ¶¨Òå ---
 $ServiceName = "EasyTierService"
 $ServiceDisplayName = "EasyTier Service"
 
-# --- é¢œè‰²å®šä¹‰ ---
+# --- ÑÕÉ«¶¨Òå ---
 $c_green = "Green"
 $c_red = "Red"
 $c_yellow = "Yellow"
 $c_cyan = "Cyan"
 $c_normal = "White"
 
-# --- è¾…åŠ©å‡½æ•° ---
+# --- ¸¨Öúº¯Êı ---
 
-# æ£€æŸ¥æ˜¯å¦ä»¥ç®¡ç†å‘˜èº«ä»½è¿è¡Œ
+# ¼ì²éÊÇ·ñÒÔ¹ÜÀíÔ±Éí·İÔËĞĞ
 function Check-Admin {
     $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = [System.Security.Principal.WindowsPrincipal]::new($identity)
     if (-not $principal.IsInRole([System.Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        Write-Host "é”™è¯¯: æ­¤è„šæœ¬å¿…é¡»ä»¥ç®¡ç†å‘˜èº«ä»½è¿è¡Œã€‚" -ForegroundColor $c_red
-        Write-Host "è¯·å³é”®ç‚¹å‡» PowerShell çª—å£æ ‡é¢˜æ ï¼Œé€‰æ‹© 'ä»¥ç®¡ç†å‘˜èº«ä»½è¿è¡Œ'ï¼Œæˆ–å³é”®ç‚¹å‡»è„šæœ¬æ–‡ä»¶é€‰æ‹© 'ä½¿ç”¨ PowerShell è¿è¡Œ'ã€‚" -ForegroundColor $c_yellow
-        Read-Host "æŒ‰ Enter é”®é€€å‡º..."
+        Write-Host "´íÎó: ´Ë½Å±¾±ØĞëÒÔ¹ÜÀíÔ±Éí·İÔËĞĞ¡£" -ForegroundColor $c_red
+        Write-Host "ÇëÓÒ¼üµã»÷ PowerShell ´°¿Ú±êÌâÀ¸£¬Ñ¡Ôñ 'ÒÔ¹ÜÀíÔ±Éí·İÔËĞĞ'£¬»òÓÒ¼üµã»÷½Å±¾ÎÄ¼şÑ¡Ôñ 'Ê¹ÓÃ PowerShell ÔËĞĞ'¡£" -ForegroundColor $c_yellow
+        Read-Host "°´ Enter ¼üÍË³ö..."
         exit 1
     }
 }
 
-# æ£€æŸ¥ EasyTier æ˜¯å¦å·²å®‰è£…
+# ¼ì²é EasyTier ÊÇ·ñÒÑ°²×°
 function Check-Installed {
     if (-not (Test-Path $CoreBinaryPath)) {
-        Write-Host "EasyTier å°šæœªå®‰è£…ã€‚è¯·å…ˆé€‰æ‹©é€‰é¡¹ 1ã€‚" -ForegroundColor $c_yellow
+        Write-Host "EasyTier ÉĞÎ´°²×°¡£ÇëÏÈÑ¡ÔñÑ¡Ïî 1¡£" -ForegroundColor $c_yellow
         return $false
     }
     return $true
 }
 
-# ä¿®æ”¹ toml æ–‡ä»¶ä¸­çš„å€¼ (PowerShell ç‰ˆæœ¬)
+# ĞŞ¸Ä toml ÎÄ¼şÖĞµÄÖµ (PowerShell °æ±¾)
 function Set-TomlValue {
     param(
         [string]$Key,
@@ -64,26 +64,26 @@ function Set-TomlValue {
         Set-Content -Path $FilePath -Value $newContent
     }
     catch {
-        Write-Host "é”™è¯¯: ä¿®æ”¹é…ç½®æ–‡ä»¶å¤±è´¥: $_" -ForegroundColor $c_red
+        Write-Host "´íÎó: ĞŞ¸ÄÅäÖÃÎÄ¼şÊ§°Ü: $_" -ForegroundColor $c_red
     }
 }
 
 
-# --- ä¸»åŠŸèƒ½å‡½æ•° ---
+# --- Ö÷¹¦ÄÜº¯Êı ---
 
 function Install-EasyTier {
-    Write-Host "--- å¼€å§‹å®‰è£…æˆ–æ›´æ–° EasyTier ---" -ForegroundColor $c_green
+    Write-Host "--- ¿ªÊ¼°²×°»ò¸üĞÂ EasyTier ---" -ForegroundColor $c_green
 
-    # åœ¨ Windows ä¸Šï¼Œæˆ‘ä»¬ä¸»è¦å…³æ³¨ x86_64
+    # ÔÚ Windows ÉÏ£¬ÎÒÃÇÖ÷Òª¹Ø×¢ x86_64
     $arch = "x86_64"
     $os_identifier = "windows"
 
-    Write-Host "1. è·å–æœ€æ–°ç‰ˆæœ¬ä¿¡æ¯..."
+    Write-Host "1. »ñÈ¡×îĞÂ°æ±¾ĞÅÏ¢..."
     try {
         $latestInfo = Invoke-RestMethod -Uri $GithubApiUrl
     }
     catch {
-        Write-Host "é”™è¯¯: æ— æ³•ä» GitHub API è·å–ç‰ˆæœ¬ä¿¡æ¯ã€‚è¯·æ£€æŸ¥ç½‘ç»œè¿æ¥ã€‚" -ForegroundColor $c_red
+        Write-Host "´íÎó: ÎŞ·¨´Ó GitHub API »ñÈ¡°æ±¾ĞÅÏ¢¡£Çë¼ì²éÍøÂçÁ¬½Ó¡£" -ForegroundColor $c_red
         return
     }
     
@@ -91,7 +91,7 @@ function Install-EasyTier {
     $asset = $latestInfo.assets | Where-Object { $_.name -like "$search_prefix*.zip" }
 
     if (-not $asset) {
-        Write-Host "é”™è¯¯: æœªèƒ½æ‰¾åˆ°é€‚ç”¨äº Windows (x64) çš„åŒ…ã€‚" -ForegroundColor $c_red
+        Write-Host "´íÎó: Î´ÄÜÕÒµ½ÊÊÓÃÓÚ Windows (x64) µÄ°ü¡£" -ForegroundColor $c_red
         return
     }
 
@@ -99,13 +99,13 @@ function Install-EasyTier {
     $fileName = $asset.name
     $version = $latestInfo.tag_name
 
-    Write-Host "æ£€æµ‹åˆ°ç‰ˆæœ¬: $version, æ¶æ„: $arch, æ–‡ä»¶: $fileName"
+    Write-Host "¼ì²âµ½°æ±¾: $version, ¼Ü¹¹: $arch, ÎÄ¼ş: $fileName"
 
     if ($GithubProxy) {
         $downloadUrl = "https://$GithubProxy/$downloadUrl"
-        Write-Host "2. ä½¿ç”¨ä»£ç†ä¸‹è½½: $downloadUrl" -ForegroundColor $c_yellow
+        Write-Host "2. Ê¹ÓÃ´úÀíÏÂÔØ: $downloadUrl" -ForegroundColor $c_yellow
     } else {
-        Write-Host "2. ç›´æ¥ä¸‹è½½: $downloadUrl"
+        Write-Host "2. Ö±½ÓÏÂÔØ: $downloadUrl"
     }
 
     $tempFile = Join-Path $env:TEMP $fileName
@@ -113,46 +113,46 @@ function Install-EasyTier {
         Invoke-WebRequest -Uri $downloadUrl -OutFile $tempFile -UseBasicParsing
     }
     catch {
-        Write-Host "ä¸‹è½½å¤±è´¥! $_" -ForegroundColor $c_red
+        Write-Host "ÏÂÔØÊ§°Ü! $_" -ForegroundColor $c_red
         if (Test-Path $tempFile) { Remove-Item $tempFile }
         return
     }
 
-    Write-Host "3. è§£å‹å¹¶å®‰è£…..."
-    # ç¡®ä¿å®‰è£…ç›®å½•å­˜åœ¨
+    Write-Host "3. ½âÑ¹²¢°²×°..."
+    # È·±£°²×°Ä¿Â¼´æÔÚ
     if (-not (Test-Path $InstallDir)) { New-Item -Path $InstallDir -ItemType Directory -Force | Out-Null }
     
     try {
         Expand-Archive -Path $tempFile -DestinationPath $InstallDir -Force
     }
     catch {
-        Write-Host "è§£å‹å¤±è´¥! $_" -ForegroundColor $c_red
+        Write-Host "½âÑ¹Ê§°Ü! $_" -ForegroundColor $c_red
         if (Test-Path $tempFile) { Remove-Item $tempFile }
         return
     }
 
-    # ====================ã€å…³é”®ä¿®å¤ä»£ç å—ã€‘====================
-    Write-Host "4. æ•´ç†æ–‡ä»¶ç»“æ„..." -ForegroundColor $c_yellow
-    # æŸ¥æ‰¾è§£å‹åå¯èƒ½åˆ›å»ºçš„å­ç›®å½• (ä¾‹å¦‚ easytier-windows-x86_64)
+    # ====================¡¾¹Ø¼üĞŞ¸´´úÂë¿é¡¿====================
+    Write-Host "4. ÕûÀíÎÄ¼ş½á¹¹..." -ForegroundColor $c_yellow
+    # ²éÕÒ½âÑ¹ºó¿ÉÄÜ´´½¨µÄ×ÓÄ¿Â¼ (ÀıÈç easytier-windows-x86_64)
     $subDir = Get-ChildItem -Path $InstallDir -Directory | Select-Object -First 1
     if ($subDir) {
-        # å¦‚æœæ‰¾åˆ°äº†å­ç›®å½•ï¼Œå°†å…¶ä¸­çš„æ‰€æœ‰å†…å®¹ç§»åŠ¨åˆ°ä¸Šå±‚å®‰è£…ç›®å½•
-        Write-Host "æ£€æµ‹åˆ°å­ç›®å½• $($subDir.FullName)ï¼Œæ­£åœ¨ç§»åŠ¨æ–‡ä»¶..." -ForegroundColor $c_cyan
+        # Èç¹ûÕÒµ½ÁË×ÓÄ¿Â¼£¬½«ÆäÖĞµÄËùÓĞÄÚÈİÒÆ¶¯µ½ÉÏ²ã°²×°Ä¿Â¼
+        Write-Host "¼ì²âµ½×ÓÄ¿Â¼ $($subDir.FullName)£¬ÕıÔÚÒÆ¶¯ÎÄ¼ş..." -ForegroundColor $c_cyan
         Move-Item -Path (Join-Path $subDir.FullName "*") -Destination $InstallDir -Force
-        # åˆ é™¤ç©ºçš„å­ç›®å½•
+        # É¾³ı¿ÕµÄ×ÓÄ¿Â¼
         Remove-Item -Path $subDir.FullName -Force -ErrorAction SilentlyContinue
     }
     # =========================================================
 
-    # æ¸…ç†å·¥ä½œ
+    # ÇåÀí¹¤×÷
     Remove-Item $tempFile
 
-    Write-Host "--- EasyTier $version å®‰è£…/æ›´æ–°æˆåŠŸ! ---" -ForegroundColor $c_green
-    Write-Host "ç¨‹åºå·²å®‰è£…åˆ°: $InstallDir" -ForegroundColor $c_cyan
+    Write-Host "--- EasyTier $version °²×°/¸üĞÂ³É¹¦! ---" -ForegroundColor $c_green
+    Write-Host "³ÌĞòÒÑ°²×°µ½: $InstallDir" -ForegroundColor $c_cyan
 
-    # å¦‚æœæœåŠ¡å·²å­˜åœ¨, é‡å¯ä»¥åº”ç”¨æ›´æ–°
+    # Èç¹û·şÎñÒÑ´æÔÚ, ÖØÆôÒÔÓ¦ÓÃ¸üĞÂ
     if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue) {
-        Write-Host "æ£€æµ‹åˆ°ç°æœ‰æœåŠ¡ï¼Œæ­£åœ¨é‡å¯ä»¥åº”ç”¨æ›´æ–°..." -ForegroundColor $c_yellow
+        Write-Host "¼ì²âµ½ÏÖÓĞ·şÎñ£¬ÕıÔÚÖØÆôÒÔÓ¦ÓÃ¸üĞÂ..." -ForegroundColor $c_yellow
         Restart-Service -Name $ServiceName
     }
 }
@@ -183,16 +183,16 @@ disable_udp_hole_punching = false
 enableKcp_Proxy = true
 "@
     Set-Content -Path $ConfigFile -Value $configContent
-    Write-Host "å·²æˆåŠŸåˆ›å»ºé»˜è®¤é…ç½®æ–‡ä»¶: $ConfigFile"
+    Write-Host "ÒÑ³É¹¦´´½¨Ä¬ÈÏÅäÖÃÎÄ¼ş: $ConfigFile"
 }
 
 function Configure-Network {
     if (-not (Check-Installed)) { return }
 
-    $network_name = Read-Host "è¯·è¾“å…¥ç½‘ç»œåç§°"
-    $network_secret = Read-Host "è¯·è¾“å…¥ç½‘ç»œå¯†é’¥"
-    $virtual_ip = Read-Host "è¯·è¾“å…¥æ­¤èŠ‚ç‚¹è™šæ‹ŸIP (ç•™ç©ºåˆ™å¯ç”¨DHCP)"
-    $is_client = Read-Host "æ˜¯å¦è¦è¿æ¥åˆ°ä¸€ä¸ªç°æœ‰çš„å¯¹ç«¯èŠ‚ç‚¹? (y/n)"
+    $network_name = Read-Host "ÇëÊäÈëÍøÂçÃû³Æ"
+    $network_secret = Read-Host "ÇëÊäÈëÍøÂçÃÜÔ¿"
+    $virtual_ip = Read-Host "ÇëÊäÈë´Ë½ÚµãĞéÄâIP (Áô¿ÕÔòÆôÓÃDHCP)"
+    $is_client = Read-Host "ÊÇ·ñÒªÁ¬½Óµ½Ò»¸öÏÖÓĞµÄ¶Ô¶Ë½Úµã? (y/n)"
 
     Create-DefaultConfig
 
@@ -200,38 +200,38 @@ function Configure-Network {
     Set-TomlValue "network_secret" "`"$network_secret`"" $ConfigFile
 
     if ([string]::IsNullOrWhiteSpace($virtual_ip)) {
-        Write-Host "æœªè¾“å…¥IPï¼Œå°†å¯ç”¨ DHCP è‡ªåŠ¨è·å–åœ°å€ã€‚" -ForegroundColor $c_yellow
+        Write-Host "Î´ÊäÈëIP£¬½«ÆôÓÃ DHCP ×Ô¶¯»ñÈ¡µØÖ·¡£" -ForegroundColor $c_yellow
         Set-TomlValue "dhcp" "true" $ConfigFile
         Set-TomlValue "ipv4" "`"`"" $ConfigFile
     } else {
-        Write-Host "å·²è®¾ç½®é™æ€IP: $virtual_ip" -ForegroundColor $c_green
+        Write-Host "ÒÑÉèÖÃ¾²Ì¬IP: $virtual_ip" -ForegroundColor $c_green
         Set-TomlValue "dhcp" "false" $ConfigFile
         Set-TomlValue "ipv4" "`"$virtual_ip`"" $ConfigFile
     }
 
     if ($is_client -eq 'y') {
-        $peer_address = Read-Host "è¯·è¾“å…¥ä¸€ä¸ªå¯¹ç«¯èŠ‚ç‚¹åœ°å€ (å¦‚ tcp://æœåŠ¡å™¨IP:11010)"
+        $peer_address = Read-Host "ÇëÊäÈëÒ»¸ö¶Ô¶Ë½ÚµãµØÖ· (Èç tcp://·şÎñÆ÷IP:11010)"
         Add-Content -Path $ConfigFile -Value "`n[[peer]]`nuri = `"$peer_address`""
     }
 
-    Write-Host "æ­£åœ¨åˆ›å»ºå¹¶é…ç½® Windows æœåŠ¡..." -ForegroundColor $c_yellow
-    # å¦‚æœæœåŠ¡å­˜åœ¨, å…ˆåˆ é™¤æ—§çš„, ä»¥ç¡®ä¿é…ç½®æ›´æ–°
+    Write-Host "ÕıÔÚ´´½¨²¢ÅäÖÃ Windows ·şÎñ..." -ForegroundColor $c_yellow
+    # Èç¹û·şÎñ´æÔÚ, ÏÈÉ¾³ı¾ÉµÄ, ÒÔÈ·±£ÅäÖÃ¸üĞÂ
     if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue) {
         Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue
-        # ä½¿ç”¨ sc.exe delete æ¯” Remove-Service æ›´å¯é 
+        # Ê¹ÓÃ sc.exe delete ±È Remove-Service ¸ü¿É¿¿
         sc.exe delete $ServiceName | Out-Null
         Start-Sleep -Seconds 2
     }
     
-    # åˆ›å»ºæœåŠ¡
+    # ´´½¨·şÎñ
     $binaryPathWithArgs = "`"$CoreBinaryPath`" -c `"$ConfigFile`""
     New-Service -Name $ServiceName -BinaryPathName $binaryPathWithArgs -DisplayName $ServiceDisplayName -StartupType Automatic
 
-    # *** å…³é”®ï¼šé…ç½®æœåŠ¡å¤±è´¥åè‡ªåŠ¨é‡å¯ï¼Œå®ç°è¿›ç¨‹å®ˆæŠ¤ ***
-    # ç¬¬ä¸€æ¬¡/ç¬¬äºŒæ¬¡/åç»­å¤±è´¥å, éƒ½åœ¨5ç§’åé‡å¯
+    # *** ¹Ø¼ü£ºÅäÖÃ·şÎñÊ§°Üºó×Ô¶¯ÖØÆô£¬ÊµÏÖ½ø³ÌÊØ»¤ ***
+    # µÚÒ»´Î/µÚ¶ş´Î/ºóĞøÊ§°Üºó, ¶¼ÔÚ5ÃëºóÖØÆô
     sc.exe failure $ServiceName reset=86400 actions=restart/5000/restart/5000/restart/5000 | Out-Null
     
-    Write-Host "æœåŠ¡åˆ›å»ºæˆåŠŸï¼Œæ­£åœ¨å¯åŠ¨..." -ForegroundColor $c_green
+    Write-Host "·şÎñ´´½¨³É¹¦£¬ÕıÔÚÆô¶¯..." -ForegroundColor $c_green
     Start-Service -Name $ServiceName
     Start-Sleep -Seconds 2
     Get-Service -Name $ServiceName | Format-List -Property Name, DisplayName, Status, StartType
@@ -240,17 +240,17 @@ function Configure-Network {
 function Manage-Service {
     if (-not (Check-Installed)) { return }
     if (-not (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
-        Write-Host "æœåŠ¡å°šæœªåˆ›å»ºã€‚è¯·å…ˆé…ç½®ç½‘ç»œ (é€‰é¡¹ 2)ã€‚" -ForegroundColor $c_yellow
+        Write-Host "·şÎñÉĞÎ´´´½¨¡£ÇëÏÈÅäÖÃÍøÂç (Ñ¡Ïî 2)¡£" -ForegroundColor $c_yellow
         return
     }
 
-    $menu_title = "ç®¡ç†EasyTieræœåŠ¡"
+    $menu_title = "¹ÜÀíEasyTier·şÎñ"
     $options = @(
-        "å¯åŠ¨æœåŠ¡",
-        "åœæ­¢æœåŠ¡",
-        "é‡å¯æœåŠ¡",
-        "æŸ¥çœ‹çŠ¶æ€",
-        "è¿”å›ä¸»èœå•"
+        "Æô¶¯·şÎñ",
+        "Í£Ö¹·şÎñ",
+        "ÖØÆô·şÎñ",
+        "²é¿´×´Ì¬",
+        "·µ»ØÖ÷²Ëµ¥"
     )
 
     while ($true) {
@@ -261,64 +261,64 @@ function Manage-Service {
         for ($i = 0; $i -lt $options.Count; $i++) {
             Write-Host ("{0}. {1}" -f ($i+1), $options[$i])
         }
-        $choice = Read-Host "è¯·é€‰æ‹©æ“ä½œ"
+        $choice = Read-Host "ÇëÑ¡Ôñ²Ù×÷"
         switch ($choice) {
-            '1' { Start-Service -Name $ServiceName; Write-Host "æœåŠ¡å·²å¯åŠ¨ã€‚" -ForegroundColor $c_green }
-            '2' { Stop-Service -Name $ServiceName; Write-Host "æœåŠ¡å·²åœæ­¢ã€‚" -ForegroundColor $c_green }
-            '3' { Restart-Service -Name $ServiceName; Write-Host "æœåŠ¡å·²é‡å¯ã€‚" -ForegroundColor $c_green }
-            '4' { # çŠ¶æ€å·²åœ¨é¡¶éƒ¨æ˜¾ç¤ºï¼Œè¿™é‡Œåˆ·æ–°ä¸€æ¬¡
+            '1' { Start-Service -Name $ServiceName; Write-Host "·şÎñÒÑÆô¶¯¡£" -ForegroundColor $c_green }
+            '2' { Stop-Service -Name $ServiceName; Write-Host "·şÎñÒÑÍ£Ö¹¡£" -ForegroundColor $c_green }
+            '3' { Restart-Service -Name $ServiceName; Write-Host "·şÎñÒÑÖØÆô¡£" -ForegroundColor $c_green }
+            '4' { # ×´Ì¬ÒÑÔÚ¶¥²¿ÏÔÊ¾£¬ÕâÀïË¢ĞÂÒ»´Î
                   Get-Service -Name $ServiceName | Format-List -Property Name, DisplayName, Status, StartType 
                 }
             '5' { return }
-            default { Write-Host "æ— æ•ˆè¾“å…¥" -ForegroundColor $c_red }
+            default { Write-Host "ÎŞĞ§ÊäÈë" -ForegroundColor $c_red }
         }
-        Read-Host "æŒ‰ Enter é”®ç»§ç»­..."
+        Read-Host "°´ Enter ¼ü¼ÌĞø..."
     }
 }
 
 function Uninstall-EasyTier {
-    Write-Host "è­¦å‘Š: æ­¤æ“ä½œå°†åœæ­¢æœåŠ¡å¹¶åˆ é™¤æ‰€æœ‰ç›¸å…³æ–‡ä»¶å’Œé…ç½®ã€‚" -ForegroundColor $c_yellow
-    $confirm = Read-Host "ç¡®å®šè¦å¸è½½å—? (y/n)"
+    Write-Host "¾¯¸æ: ´Ë²Ù×÷½«Í£Ö¹·şÎñ²¢É¾³ıËùÓĞÏà¹ØÎÄ¼şºÍÅäÖÃ¡£" -ForegroundColor $c_yellow
+    $confirm = Read-Host "È·¶¨ÒªĞ¶ÔØÂğ? (y/n)"
     if ($confirm -ne 'y') {
-        Write-Host "æ“ä½œå·²å–æ¶ˆã€‚"
+        Write-Host "²Ù×÷ÒÑÈ¡Ïû¡£"
         return
     }
 
-    Write-Host "æ­£åœ¨åœæ­¢å¹¶åˆ é™¤æœåŠ¡..."
+    Write-Host "ÕıÔÚÍ£Ö¹²¢É¾³ı·şÎñ..."
     if (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue) {
         Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue
         sc.exe delete $ServiceName | Out-Null
-        Start-Sleep -Seconds 2 # ç­‰å¾…æœåŠ¡åˆ é™¤å®Œæˆ
+        Start-Sleep -Seconds 2 # µÈ´ı·şÎñÉ¾³ıÍê³É
     }
 
-    Write-Host "æ­£åœ¨åˆ é™¤æ–‡ä»¶å’Œç›®å½•..."
+    Write-Host "ÕıÔÚÉ¾³ıÎÄ¼şºÍÄ¿Â¼..."
     if (Test-Path $InstallDir) { Remove-Item -Path $InstallDir -Recurse -Force }
     if (Test-Path $ConfigDir) { Remove-Item -Path $ConfigDir -Recurse -Force }
     
-    Write-Host "EasyTier å·²æˆåŠŸå¸è½½ã€‚" -ForegroundColor $c_green
+    Write-Host "EasyTier ÒÑ³É¹¦Ğ¶ÔØ¡£" -ForegroundColor $c_green
 }
 
 
-# --- ä¸»èœå•å¾ªç¯ ---
+# --- Ö÷²Ëµ¥Ñ­»· ---
 function Show-MainMenu {
     Check-Admin
     while ($true) {
         Clear-Host
         Write-Host "=======================================================" -ForegroundColor $c_cyan
-        Write-Host "      EasyTier è·¨å¹³å°éƒ¨ç½²è„šæœ¬ (Windows Edition)" -ForegroundColor $c_green
+        Write-Host "      EasyTier ¿çÆ½Ì¨²¿Êğ½Å±¾ (Windows Edition)" -ForegroundColor $c_green
         Write-Host "=======================================================" -ForegroundColor $c_cyan
-        Write-Host " 1. å®‰è£…æˆ–æ›´æ–° EasyTier"
-        Write-Host " 2. é…ç½®ç½‘ç»œå¹¶å®‰è£…æœåŠ¡ (é¦–æ¬¡è®¾ç½®)"
+        Write-Host " 1. °²×°»ò¸üĞÂ EasyTier"
+        Write-Host " 2. ÅäÖÃÍøÂç²¢°²×°·şÎñ (Ê×´ÎÉèÖÃ)"
         Write-Host "-------------------------------------------------------"
-        Write-Host " 3. ç®¡ç† EasyTier æœåŠ¡çŠ¶æ€"
-        Write-Host " 4. æŸ¥çœ‹ EasyTier é…ç½®æ–‡ä»¶"
-        Write-Host " 5. æŸ¥çœ‹ EasyTier ç½‘ç»œèŠ‚ç‚¹"
+        Write-Host " 3. ¹ÜÀí EasyTier ·şÎñ×´Ì¬"
+        Write-Host " 4. ²é¿´ EasyTier ÅäÖÃÎÄ¼ş"
+        Write-Host " 5. ²é¿´ EasyTier ÍøÂç½Úµã"
         Write-Host "-------------------------------------------------------"
-        Write-Host " 6. å¸è½½ EasyTier"
-        Write-Host " 0. é€€å‡ºè„šæœ¬"
+        Write-Host " 6. Ğ¶ÔØ EasyTier"
+        Write-Host " 0. ÍË³ö½Å±¾"
         Write-Host "=======================================================" -ForegroundColor $c_cyan
 
-        $choice = Read-Host "è¯·è¾“å…¥é€‰é¡¹ [0-6]"
+        $choice = Read-Host "ÇëÊäÈëÑ¡Ïî [0-6]"
         
         switch ($choice) {
             '1' { Install-EasyTier }
@@ -329,7 +329,7 @@ function Show-MainMenu {
                     Clear-Host
                     Get-Content $ConfigFile | Write-Host
                 } else {
-                    Write-Host "é…ç½®æ–‡ä»¶ä¸å­˜åœ¨æˆ–æœªå®‰è£…ã€‚" -ForegroundColor $c_yellow
+                    Write-Host "ÅäÖÃÎÄ¼ş²»´æÔÚ»òÎ´°²×°¡£" -ForegroundColor $c_yellow
                 }
             }
             '5' {
@@ -340,12 +340,12 @@ function Show-MainMenu {
             }
             '6' { Uninstall-EasyTier }
             '0' { exit 0 }
-            default { Write-Host "æ— æ•ˆè¾“å…¥" -ForegroundColor $c_red }
+            default { Write-Host "ÎŞĞ§ÊäÈë" -ForegroundColor $c_red }
         }
         Write-Host ""
-        Read-Host "æŒ‰ä»»æ„é”®è¿”å›ä¸»èœå•..."
+        Read-Host "°´ÈÎÒâ¼ü·µ»ØÖ÷²Ëµ¥..."
     }
 }
 
-# --- è„šæœ¬å…¥å£ ---
+# --- ½Å±¾Èë¿Ú ---
 Show-MainMenu
